@@ -20,6 +20,8 @@ const getAllUser = async (req, res) => {
 
         const total = await User.count();
 
+        // Perubahan dari branch feature post
+
         res.status(200).json({ data: user, total: total });
     } catch {
         res.status(500).json({ message: 'Internal server error' });
