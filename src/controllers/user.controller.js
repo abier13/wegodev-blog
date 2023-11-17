@@ -21,6 +21,7 @@ const getAllUser = async (req, res) => {
         const total = await User.count();
 
         // Perubahan baru di master
+        // Perubahan dari branch feature post
 
         res.status(200).json({ data: user, total: total });
     } catch {
