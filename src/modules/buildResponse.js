@@ -10,4 +10,10 @@ const updated = (dataResponse) => ({
   ...dataResponse,
 });
 
-module.exports = { get, updated };
+const created = (dataResponse) => ({
+  code: 201,
+  message: 'Data berhasil dibuat',
+  ...dataResponse,
+});
+
+module.exports = { get, updated, created };
