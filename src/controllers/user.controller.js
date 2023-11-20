@@ -1,6 +1,14 @@
 const bcrypt = require('bcrypt');
+const yup = require('yup');
 const { User } = require('../../models');
 const { set, get, del } = require('../modules/redis');
+const { sendEmail } = require('../middlewares/sendEmail');
+
+const createUserSchema = yup.object().shape({
+  fullName: yup.string().required('Nama lengkap harus diisi'),
+  email: yup.string().email().required('Email harus diisi'),
+  password: yup.string().required('Password harus diisi').min(8, 'Password minimal 8 karakter'),
+});
 
 const getAllUser = async (req, res) => {
   try {
@@ -39,21 +47,27 @@ const getAllUser = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { body } = req;
-    const {
-      fullName, email, password,
-    } = body;
 
-    const saltRound = 10;
-    const hashPassword = bcrypt.hashSync(password, saltRound);
+    createUserSchema.validate(body)
+      .then(async (valid) => {
+        const { fullName, email, password } = valid;
 
-    const resp = await User.create({
-      fullName, email, password: hashPassword, status: 'Active',
-    });
+        const saltRound = 10;
+        const hashPassword = bcrypt.hashSync(password, saltRound);
 
-    console.log('resp', resp);
+        const resp = await User.create({
+          fullName, email, password: hashPassword, status: 'Active',
+        });
 
-    await set(`user/${resp.id}`, resp);
-    res.status(201).json({ message: 'Berhasil tambah data' });
+        await set(`user/${resp.id}`, resp);
+
+        sendEmail('mifachry@gmail.com', email, 'Register user');
+
+        res.status(201).json({ message: 'Berhasil tambah data' });
+      })
+      .catch((error) => {
+        res.status(400).json({ message: error.message });
+      });
   } catch {
     res.status(500).json({ message: 'Internal server error' });
   }
