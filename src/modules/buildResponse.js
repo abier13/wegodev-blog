@@ -4,10 +4,17 @@ const created = (dataResponse) => ({
   ...dataResponse,
 });
 
+const get = (dataResponse) => ({
+  code: 200,
+  message: 'Data sudah diterima',
+  ...dataResponse,
+});
+
 const createdUpload = (dataResponse) => ({
   code: 201,
   message: 'Berhasil menambahkan data',
   ...dataResponse,
 });
 
-module.exports = { created, createdUpload };
+
+module.exports = { created, get, createdUpload };

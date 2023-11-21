@@ -11,6 +11,37 @@ const createUserSchema = yup.object().shape({
     .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
 });
 
+const getAllUsers = async (req, res) => {
+  let { page, pageSize, fullName } = req.query;
+  page = parseInt(page) || 1;
+  pageSize = parseInt(pageSize) || 10;
+
+  let where = {};
+  if (fullName) {
+    where = { fullName };
+  }
+
+  const data = await User.findAll({
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
+    where,
+  });
+
+  const totalUser = await User.count();
+
+  // const total = await User.count();
+
+  // const buildResponse = BuildResponse.get();
+  const resp = {
+    code: res.statusCode,
+    message: `${totalUser} data sudah diterima`,
+    count: totalUser,
+    data,
+  };
+
+  res.status(200).json(resp);
+};
+
 const createUser = async (req, res) => {
   try {
     const { body } = req;
@@ -41,5 +72,6 @@ const createUser = async (req, res) => {
 };
 
 module.exports = {
+  getAllUsers,
   createUser,
 };
