@@ -1,9 +1,9 @@
-'use strict';
 const {
-  Model, Sequelize
+  Model, Sequelize,
 } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class File extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,38 +13,27 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  User.init({
+  File.init({
+    url: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
     },
-    fullName: {
+    fileName: {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    email: {
-      type: Sequelize.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    role: {
-      type: Sequelize.ENUM('Super Admin', 'Admin', 'Anggota'),
-      allowNull: false,
-      defaultValue: 'Anggota',
-    },
-    password: {
+    type: {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    status: {
-      type: Sequelize.ENUM('Active', 'Suspend'),
+    path: {
+      type: Sequelize.STRING,
       allowNull: false,
-    },
-    avatar: {
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
-      allowNull: true,
     },
     createdAt: {
       type: Sequelize.DATE,
@@ -52,16 +41,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     updatedAt: {
       type: Sequelize.DATE,
-      allowNull: false
+      allowNull: false,
     },
-    deletedAt: {
-      type: Sequelize.DATE,
-      allowNull: true
-    }
   }, {
     sequelize,
-    paranoid: true, // Fungsi nya untuk soft delete
-    modelName: 'User',
+    paranoid: false,
+    modelName: 'File',
   });
-  return User;
+  return File;
 };
