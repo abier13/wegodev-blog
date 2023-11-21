@@ -42,6 +42,28 @@ const getAllUsers = async (req, res) => {
   res.status(200).json(resp);
 };
 
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  const getData = await User.findByPk(id);
+
+  if (!getData) {
+    throw new Error('User tidak ditemukan');
+  }
+
+  const removePassword = JSON.stringify(getData, (key, value) => {
+    if (key === 'password') {
+      return undefined;
+    }
+    return value;
+  });
+
+  const data = JSON.parse(removePassword);
+  const buildResponse = BuildResponse.get({ data });
+
+  res.status(200).json(buildResponse);
+};
+
 const createUser = async (req, res) => {
   try {
     const { body } = req;
@@ -74,4 +96,5 @@ const createUser = async (req, res) => {
 module.exports = {
   getAllUsers,
   createUser,
+  getUserById,
 };
