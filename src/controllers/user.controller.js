@@ -11,13 +11,6 @@ const userSchema = yup.object().shape({
     .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
 });
 
-// const checkPasswordEmail = yup.object().shape({
-//   email: yup.string().email('Format email tidak sesuai'),
-//   newPassword: yup.string().min(6, 'Pasword minimal 6'),
-//   confirmNewPassword: yup.string()
-//     .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
-// });
-
 const getAllUsers = async (req, res) => {
   let { page, pageSize, fullName } = req.query;
   page = parseInt(page) || 1;
@@ -55,7 +48,7 @@ const getUserById = async (req, res) => {
   const getData = await User.findByPk(id);
 
   if (!getData) {
-    throw new Error('User tidak ditemukan');
+    res.status(404).json({ message: 'User tidak ditemukan' });
   }
 
   const hidePassword = JSON.stringify(getData, (key, value) => {
@@ -114,7 +107,7 @@ const updateUser = async (req, res) => {
         const saltRound = 10;
         const hashPassword = bcrypt.hashSync(newPassword, saltRound);
 
-        const getData = await User.update({
+        await User.update({
           fullName, email, password: hashPassword, status, avatar, role,
         }, { where: { id } });
 
