@@ -3,13 +3,20 @@ const bcrypt = require('bcrypt');
 const BuildResponse = require('../modules/buildResponse');
 const { User } = require('../../models');
 
-const createUserSchema = yup.object().shape({
+const userSchema = yup.object().shape({
   fullName: yup.string().required('Nama lengkap harus diisi'),
-  // email: yup.string().email('Format email tidak sesuai').required('Email harus diisi'),
-  newPassword: yup.string().required('Password harus diisi'),
+  email: yup.string().email('Format email tidak sesuai').required('Email harus diisi'),
+  newPassword: yup.string().required('Password harus diisi').min(6, 'Pasword minimal 6'),
   confirmNewPassword: yup.string().required('Konfirmasi password harus diisi')
     .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
 });
+
+// const checkPasswordEmail = yup.object().shape({
+//   email: yup.string().email('Format email tidak sesuai'),
+//   newPassword: yup.string().min(6, 'Pasword minimal 6'),
+//   confirmNewPassword: yup.string()
+//     .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
+// });
 
 const getAllUsers = async (req, res) => {
   let { page, pageSize, fullName } = req.query;
@@ -51,14 +58,14 @@ const getUserById = async (req, res) => {
     throw new Error('User tidak ditemukan');
   }
 
-  const removePassword = JSON.stringify(getData, (key, value) => {
+  const hidePassword = JSON.stringify(getData, (key, value) => {
     if (key === 'password') {
       return undefined;
     }
     return value;
   });
 
-  const data = JSON.parse(removePassword);
+  const data = JSON.parse(hidePassword);
   const buildResponse = BuildResponse.get({ data });
 
   res.status(200).json(buildResponse);
@@ -68,7 +75,7 @@ const createUser = async (req, res) => {
   try {
     const { body } = req;
 
-    createUserSchema.validate(body)
+    userSchema.validate(body)
       .then(async (valid) => {
         const {
           fullName, email, newPassword, role, status,
@@ -93,8 +100,78 @@ const createUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { body } = req;
+
+    userSchema.validate(body)
+      .then(async (valid) => {
+        const {
+          fullName, email, newPassword, status, avatar, role,
+        } = valid;
+
+        const saltRound = 10;
+        const hashPassword = bcrypt.hashSync(newPassword, saltRound);
+
+        const getData = await User.update({
+          fullName, email, password: hashPassword, status, avatar, role,
+        }, { where: { id } });
+
+        const data = {
+          id, fullName, email, status, avatar, role,
+        };
+
+        const buildResponse = BuildResponse.update({ data });
+
+        return res.status(201).json(buildResponse);
+      })
+      .catch((error) => {
+        res.status(400).json({ message: error.message });
+      });
+  } catch {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await User.destroy({ where: { id } });
+
+    const buildResponse = BuildResponse.deleted();
+    return res.status(201).json(buildResponse);
+  } catch {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   createUser,
   getUserById,
+  updateUser,
+  deleteUser,
 };
+
+/*
+userSchema.validate(body)
+      .then(async (valid) => {
+        const {
+          fullName, email, newPassword, status, avatar, role,
+        } = valid;
+
+        const saltRound = 10;
+        const hashPassword = bcrypt.hashSync(newPassword, saltRound);
+
+        const data = await User.update({
+          fullName, email, password: hashPassword, status, avatar, role,
+        }, { where: { id } });
+
+        const buildResponse = BuildResponse.created({ data });
+
+        return res.status(201).json(buildResponse);
+      })
+      .catch((error) => {
+        res.status(400).json({ message: error.message });
+      }); */
