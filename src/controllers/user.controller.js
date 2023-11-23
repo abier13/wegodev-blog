@@ -1,7 +1,7 @@
 const yup = require('yup');
 const bcrypt = require('bcrypt');
 const BuildResponse = require('../modules/buildResponse');
-const { User } = require('../../models');
+const { User, File } = require('../../models');
 
 const userSchema = yup.object().shape({
   fullName: yup.string().required('Nama lengkap harus diisi'),
@@ -26,6 +26,11 @@ const getAllUsers = async (req, res) => {
       limit: pageSize,
       offset: (page - 1) * pageSize,
       where,
+      include: [
+        {
+          model: File,
+        },
+      ],
     });
 
     const totalUser = await User.count();
@@ -46,7 +51,7 @@ const getAllUsers = async (req, res) => {
 
     res.status(200).json(resp);
   } catch (error) {
-    console.log(error.message);
+    console.log('Get AllUser :', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

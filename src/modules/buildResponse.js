@@ -22,6 +22,12 @@ const updated = (dataResponse) => ({
   ...dataResponse,
 });
 
+const respLogin = (dataResponse) => ({
+  code: 200,
+  message: 'Berhasil masuk',
+  ...dataResponse,
+});
+
 module.exports = {
-  createdUpload, created, get, updated,
+  createdUpload, created, get, updated, respLogin
 };
