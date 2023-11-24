@@ -1,6 +1,6 @@
 const yup = require('yup');
 const BuildResponse = require('../modules/buildResponse');
-const { Category } = require('../../models');
+const { Categories } = require('../../models');
 
 const categorySchema = yup.object().shape({
   title: yup.string().required('Title harus diisi'),
@@ -17,13 +17,13 @@ const getAllCategory = async (req, res) => {
       where = { title };
     }
 
-    const data = await Category.findAll({
+    const data = await Categories.findAll({
       limit: pageSize,
       offset: (page - 1) * pageSize,
       where,
     });
 
-    const totalCategory = await Category.count();
+    const totalCategory = await Categories.count();
     const resp = {
       code: res.statusCode,
       message: `${totalCategory} data sudah diterima`,
@@ -42,7 +42,7 @@ const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await Category.findByPk(id);
+    const data = await Categories.findByPk(id);
 
     if (!data) {
       res.status(404).json({ message: 'Category tidak ditemukan' });
@@ -63,7 +63,7 @@ const createCategory = async (req, res) => {
     categorySchema.validate(body)
       .then(async (valid) => {
         const { title } = valid;
-        const data = await Category.create({
+        const data = await Categories.create({
           title,
         });
 
@@ -89,7 +89,7 @@ const updateCategory = async (req, res) => {
         const { title } = valid;
         const data = { title };
 
-        await Category.update({ data }, { where: { id } });
+        await Categories.update({ data }, { where: { id } });
 
         const buildResponse = BuildResponse.updated({ data });
         return res.status(201).json(buildResponse);
@@ -105,7 +105,7 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    await Category.destroy({ where: { id } });
+    await Categories.destroy({ where: { id } });
 
     const buildResponse = BuildResponse.deleted({});
     res.status(201).json(buildResponse);
