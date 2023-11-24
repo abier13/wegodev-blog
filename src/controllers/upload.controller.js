@@ -18,18 +18,11 @@ const upload = async (req, res) => {
       url: fileUrl,
     });
 
-    // const data = {
-    //   url: fileUrl,
-    //   fileName: filename,
-    //   type: fileType,
-    //   path: filePath,
-    // };
-
     const buildResponse = BuildResponse.createdUpload({ data });
 
     return res.status(201).json(buildResponse);
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

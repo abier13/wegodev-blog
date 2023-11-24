@@ -1,7 +1,7 @@
 const yup = require('yup');
 const bcrypt = require('bcrypt');
 const BuildResponse = require('../modules/buildResponse');
-const { User } = require('../../models');
+const { User, File } = require('../../models');
 
 const userSchema = yup.object().shape({
   fullName: yup.string().required('Nama lengkap harus diisi'),
@@ -11,9 +11,18 @@ const userSchema = yup.object().shape({
     .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
 });
 
+const updatedUserSchema = yup.object().shape({
+  fullName: yup.string().required('Nama lengkap harus diisi'),
+  email: yup.string().email('Format email tidak sesuai').required('Email harus diisi'),
+  newPassword: yup.string().min(6, 'Pasword minimal 6'),
+  confirmNewPassword: yup.string()
+    .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
+});
+
 const getAllUsers = async (req, res) => {
   try {
     let { page, pageSize, fullName } = req.query;
+
     page = parseInt(page) || 1;
     pageSize = parseInt(pageSize) || 10;
 
@@ -26,9 +35,14 @@ const getAllUsers = async (req, res) => {
       limit: pageSize,
       offset: (page - 1) * pageSize,
       where,
+      include: [
+        {
+          model: File,
+          as: 'Avatar',
+        },
+      ],
     });
 
-    const totalUser = await User.count();
     const hidePassword = JSON.stringify(getAllData, (key, value) => {
       if (key === 'password') {
         return undefined;
@@ -39,14 +53,14 @@ const getAllUsers = async (req, res) => {
     const data = JSON.parse(hidePassword);
     const resp = {
       code: res.statusCode,
-      message: `${totalUser} data sudah diterima`,
-      count: totalUser,
+      message: `${data.length} data sudah diterima`,
+      count: data.length,
       data,
     };
 
     res.status(200).json(resp);
   } catch (error) {
-    console.log(error.message);
+    console.log('Get AllUser :', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -73,6 +87,7 @@ const getUserById = async (req, res) => {
 
     res.status(200).json(buildResponse);
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -111,25 +126,35 @@ const updateUser = async (req, res) => {
     const { id } = req.params;
     const { body } = req;
 
-    userSchema.validate(body)
+    updatedUserSchema.validate(body)
       .then(async (valid) => {
         const {
           fullName, email, newPassword, status, avatar, role,
         } = valid;
 
-        const saltRound = 10;
-        const hashPassword = bcrypt.hashSync(newPassword, saltRound);
+        if (newPassword === '' || newPassword === undefined) {
+          await User.update({
+            fullName, email, status, avatar, role,
+          }, { where: { id } });
+        } else {
+          const saltRound = 10;
+          const hashPassword = bcrypt.hashSync(newPassword, saltRound);
 
-        await User.update({
-          fullName, email, password: hashPassword, status, avatar, role,
-        }, { where: { id } });
+          await User.update({
+            fullName, email, password: hashPassword, status, avatar, role,
+          }, { where: { id } });
+        }
 
-        const data = {
-          id, fullName, email, status, avatar, role,
-        };
+        const getData = await User.findByPk(id);
+        const hidePassword = JSON.stringify(getData, (key, value) => {
+          if (key === 'password') {
+            return undefined;
+          }
+          return value;
+        });
 
+        const data = JSON.parse(hidePassword);
         const buildResponse = BuildResponse.updated({ data });
-
         return res.status(201).json(buildResponse);
       })
       .catch((error) => {

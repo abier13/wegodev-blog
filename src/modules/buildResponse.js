@@ -22,6 +22,18 @@ const updated = (dataResponse) => ({
   ...dataResponse,
 });
 
+const deleted = (dataResponse) => ({
+  code: 200,
+  message: 'Data berhasil dihapus',
+  ...dataResponse,
+});
+
+const respLogin = (dataResponse) => ({
+  code: 200,
+  message: 'Berhasil masuk',
+  ...dataResponse,
+});
+
 module.exports = {
-  createdUpload, created, get, updated,
+  createdUpload, created, get, updated, respLogin, deleted,
 };

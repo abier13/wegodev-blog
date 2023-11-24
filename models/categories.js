@@ -1,52 +1,28 @@
+'use strict';
 const {
   Model, Sequelize,
 } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class Categories extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      User.belongsTo(models.File, {
-        foreignKey: 'avatar',
-        as:'Avatar',
-      });
+      
     }
   }
-  User.init({
+  Categories.init({
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
     },
-    fullName: {
+    title: {
       type: Sequelize.STRING,
       allowNull: false,
-    },
-    email: {
-      type: Sequelize.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    role: {
-      type: Sequelize.ENUM('Super Admin', 'Creator'),
-      allowNull: false,
-      defaultValue: 'Creator',
-    },
-    password: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    status: {
-      type: Sequelize.ENUM('Active', 'Suspend'),
-      allowNull: false,
-    },
-    avatar: {
-      type: Sequelize.UUID,
-      allowNull: true,
     },
     createdAt: {
       type: Sequelize.DATE,
@@ -63,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     paranoid: true,
-    modelName: 'User',
+    modelName: 'Categories',
   });
-  return User;
+  return Categories;
 };
