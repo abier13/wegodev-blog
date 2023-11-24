@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const { env } = process;
 
-const AuthenticationSuperAdmin = (req, res, next) => {
+const AuthorizationSuperAdmin = (req, res, next) => {
   const token = req.headers.authorization;
   if (!token) {
     return res.status(401).json({ message: 'Akses ditolak' });
@@ -23,11 +23,11 @@ const AuthenticationSuperAdmin = (req, res, next) => {
   });
 };
 
-const AuthenticationCreator = (req, res, next) => {
+const AuthorizationCreator = (req, res, next) => {
   const { id } = req.params;
   const token = req.headers.authorization;
   if (!token) {
-    return res.status(401).json({});
+    return res.status(401).json({ message: 'Akses ditolak' });
   }
 
   jwt.verify(token.split(' ')[1], env.SECRET_KEY, (err, decoded) => {
@@ -35,31 +35,26 @@ const AuthenticationCreator = (req, res, next) => {
       throw new Error(err.message);
     }
 
-    if (decoded.role === 'Creator' && decoded.id === id) {
+    if ((decoded.role === 'Creator' || decoded.role === 'Super Admin') && decoded.id === id) {
       next();
     } else {
-      res.status(401).json({ message: 'Akses ditolak' });
+      res.status(401).json({ message: 'Id tidak sama dengan Akun Anda' });
     }
   });
 };
 
-const Authentication = (req, res, next) => {
+const Authorization = (req, res, next) => {
   const token = req.headers.authorization;
   if (!token) {
-    return res.status(401).json({});
+    return res.status(401).json({ message: ' Akses ditolak' });
   }
 
   jwt.verify(token.split(' ')[1], env.SECRET_KEY, (err, decoded) => {
     if (err) {
       throw new Error(err.message);
     }
-
-    if (decoded.role === 'Creator' && decoded.id === id) {
-      next();
-    } else {
-      res.status(401).json({ message: 'Akses ditolak' });
-    }
+    next(null, decoded);
   });
 };
 
-module.exports = { AuthenticationCreator, AuthenticationSuperAdmin, Authentication, };
+module.exports = { AuthorizationCreator, AuthorizationSuperAdmin, Authorization };

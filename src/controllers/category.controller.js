@@ -23,11 +23,10 @@ const getAllCategory = async (req, res) => {
       where,
     });
 
-    const totalCategory = await Categories.count();
     const resp = {
       code: res.statusCode,
-      message: `${totalCategory} data sudah diterima`,
-      count: totalCategory,
+      message: `${data.length} data sudah diterima`,
+      count: data.length,
       data,
     };
 

@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       User.belongsTo(models.File, {
         foreignKey: 'avatar',
+        as:'Avatar',
       });
     }
   }
