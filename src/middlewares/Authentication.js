@@ -43,4 +43,23 @@ const AuthenticationCreator = (req, res, next) => {
   });
 };
 
-module.exports = { AuthenticationCreator, AuthenticationSuperAdmin };
+const Authentication = (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    return res.status(401).json({});
+  }
+
+  jwt.verify(token.split(' ')[1], env.SECRET_KEY, (err, decoded) => {
+    if (err) {
+      throw new Error(err.message);
+    }
+
+    if (decoded.role === 'Creator' && decoded.id === id) {
+      next();
+    } else {
+      res.status(401).json({ message: 'Akses ditolak' });
+    }
+  });
+};
+
+module.exports = { AuthenticationCreator, AuthenticationSuperAdmin, Authentication, };

@@ -14,6 +14,7 @@ const userSchema = yup.object().shape({
 const getAllUsers = async (req, res) => {
   try {
     let { page, pageSize, fullName } = req.query;
+    
     page = parseInt(page) || 1;
     pageSize = parseInt(pageSize) || 10;
 
@@ -78,6 +79,7 @@ const getUserById = async (req, res) => {
 
     res.status(200).json(buildResponse);
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -129,12 +131,9 @@ const updateUser = async (req, res) => {
           fullName, email, password: hashPassword, status, avatar, role,
         }, { where: { id } });
 
-        const data = {
-          id, fullName, email, status, avatar, role,
-        };
 
+        const data = await User.findByPk(id);
         const buildResponse = BuildResponse.updated({ data });
-
         return res.status(201).json(buildResponse);
       })
       .catch((error) => {
