@@ -4,9 +4,9 @@ const BuildResponse = require('../modules/buildResponse');
 
 const postSchema = yup.object().shape({
   title: yup.string().required('Title harus diisi'),
-  deskripsi: yup.string().required('Deskripsi harus diisi'),
+  description: yup.string().required('Deskripsi harus diisi'),
   status: yup.string().required('Status harus diisi'),
-  categoryId: yup.array().of(yup.string()).required('Category Id harus diisi'),
+  categoryIds: yup.array().of(yup.string()).required('Category Id harus diisi'),
 });
 
 const getAllPosts = async (req, res) => {
@@ -32,12 +32,11 @@ const getAllPosts = async (req, res) => {
         },
       ],
     });
-    const totalPost = await Posts.count();
 
     const resp = {
       code: res.statusCode,
-      message: `${totalPost} data sudah diterima`,
-      count: totalPost,
+      message: `${data.length} data sudah diterima`,
+      count: data.length,
       data,
     };
 
@@ -70,7 +69,8 @@ const getPostById = async (req, res) => {
 const getPostBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const data = await Posts.findOne({ where: { slug }, raw: true });
+    console.log(slug);
+    const data = await Posts.findAll({ where: { slug }, raw: true });
     if (!data) {
       throw new Error('Slug tidak valid');
     }
@@ -90,14 +90,15 @@ const createPost = async (req, res) => {
     postSchema.validate(body)
       .then(async (valid) => {
         const {
-          title, description, categoryId, status,
+          title, description, categoryIds, status,
         } = valid;
-    
+
         const data = await Posts.create({
           status, description, title, slug: title.split(' ').join('-').toLowerCase(),
         });
-    
-        for (const index of categoryId) {
+
+        for (const index of categoryIds) {
+          console.log(index);
           const checkCategory = await Categories.findOne({ where: { id: index }, raw: true });
           if (!checkCategory) {
             return res.status(404).json({ message: 'Category Id tidak ada' });
@@ -106,7 +107,7 @@ const createPost = async (req, res) => {
             { postId: data.id, categoryId: index },
           ]), { returning: true };
         }
-    
+
         const buildResponse = BuildResponse.created({ data });
         return res.status(201).json(buildResponse);
       })
@@ -127,7 +128,7 @@ const updatePost = async (req, res) => {
     postSchema.validate(body)
       .then(async (valid) => {
         const {
-          title, description, categoryId, status,
+          title, description, categoryIds, status,
         } = valid;
 
         const checkPost = await Posts.findByPk(id);
@@ -135,18 +136,19 @@ const updatePost = async (req, res) => {
           res.status(404).json({ message: 'Post tidak ditemukan' });
         }
 
-        await Postcategories.destroy({ where: { postId: id } });
-        await Posts.update(({
-          title, description, status, slug: title.split(' ').join('-').toLowerCase()
-        }));
+        await Postcategories.destroy({ where: { postId: id }, force: true });
+        const slug = title.split(' ').join('-').toLowerCase();
+        await Posts.update({
+          title, description, status, slug,
+        }, { where: { id } });
 
-        for (const index of categoryId) {
+        for (const index of categoryIds) {
           const checkCategory = await Categories.findOne({ where: { id: index }, raw: true });
           if (!checkCategory) {
             return res.status(404).json({ message: 'Category Id tidak ada' });
           }
           await Postcategories.bulkCreate([
-            { postId: data.id, categoryId: index },
+            { postId: id, categoryId: index },
           ]), { returning: true };
         }
 
@@ -165,8 +167,9 @@ const updatePost = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
+    await Postcategories.destroy({ where: { postId: id }, force: true });
     await Posts.destroy({ where: { id } });
-
+    
     const buildResponse = BuildResponse.deleted();
     return res.status(201).json(buildResponse);
   } catch {

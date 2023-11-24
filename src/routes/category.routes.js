@@ -7,8 +7,8 @@ const CategoryController = require('../controllers/category.controller');
 
 router.get('/categories', CategoryController.getAllCategory);
 router.get('/categories/:id', CategoryController.getCategoryById);
-router.post('/categories', Authentication.AuthenticationCreator, CategoryController.createCategory);
-router.put('/categories/:id', Authentication.AuthenticationCreator, CategoryController.updateCategory);
-router.post('/categories/:id', Authentication.AuthenticationCreator, CategoryController.deleteCategory);
+router.post('/categories', Authentication.Authorization, CategoryController.createCategory);
+router.put('/categories/:id', Authentication.Authorization, CategoryController.updateCategory);
+router.post('/categories/:id', Authentication.Authorization, CategoryController.deleteCategory);
 
 module.exports = router;
