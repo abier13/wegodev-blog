@@ -18,7 +18,7 @@ const AuthorizationSuperAdmin = (req, res, next) => {
     if (decoded.role === 'Super Admin') {
       next();
     } else {
-      res.status(401).json({ message: 'Akses ditolak' });
+      res.status(401).json({ message: 'Akses ditolak, anda bukan Admin' });
     }
   });
 };
