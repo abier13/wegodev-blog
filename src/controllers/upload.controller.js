@@ -22,7 +22,7 @@ const upload = async (req, res) => {
 
     return res.status(201).json(buildResponse);
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

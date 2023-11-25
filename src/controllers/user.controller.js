@@ -1,7 +1,11 @@
 const yup = require('yup');
 const bcrypt = require('bcrypt');
 const BuildResponse = require('../modules/buildResponse');
+<<<<<<< HEAD
 const { User } = require('../../models');
+=======
+const { User, File } = require('../../models');
+>>>>>>> post
 
 const userSchema = yup.object().shape({
   fullName: yup.string().required('Nama lengkap harus diisi'),
@@ -11,6 +15,7 @@ const userSchema = yup.object().shape({
     .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
 });
 
+<<<<<<< HEAD
 const getAllUsers = async (req, res) => {
   let { page, pageSize, fullName } = req.query;
   page = parseInt(page) || 1;
@@ -62,6 +67,87 @@ const getUserById = async (req, res) => {
   const buildResponse = BuildResponse.get({ data });
 
   res.status(200).json(buildResponse);
+=======
+const updatedUserSchema = yup.object().shape({
+  fullName: yup.string().required('Nama lengkap harus diisi'),
+  email: yup.string().email('Format email tidak sesuai').required('Email harus diisi'),
+  newPassword: yup.string().min(6, 'Pasword minimal 6'),
+  confirmNewPassword: yup.string()
+    .oneOf([yup.ref('newPassword'), null], 'Konfirmasi password tidak sesuai'),
+});
+
+const getAllUsers = async (req, res) => {
+  try {
+    let { page, pageSize, fullName } = req.query;
+
+    page = parseInt(page) || 1;
+    pageSize = parseInt(pageSize) || 10;
+
+    let where = {};
+    if (fullName) {
+      where = { fullName };
+    }
+
+    const getAllData = await User.findAll({
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+      where,
+      include: [
+        {
+          model: File,
+          as: 'Avatar',
+        },
+      ],
+    });
+
+    const hidePassword = JSON.stringify(getAllData, (key, value) => {
+      if (key === 'password') {
+        return undefined;
+      }
+      return value;
+    });
+
+    const data = JSON.parse(hidePassword);
+    const resp = {
+      code: res.statusCode,
+      message: `${data.length} data sudah diterima`,
+      count: data.length,
+      data,
+    };
+
+    res.status(200).json(resp);
+  } catch (error) {
+    console.log('Get AllUser :', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const getData = await User.findByPk(id);
+
+    if (!getData) {
+      res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    const hidePassword = JSON.stringify(getData, (key, value) => {
+      if (key === 'password') {
+        return undefined;
+      }
+      return value;
+    });
+
+    const data = JSON.parse(hidePassword);
+    const buildResponse = BuildResponse.get({ data });
+
+    res.status(200).json(buildResponse);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+>>>>>>> post
 };
 
 const createUser = async (req, res) => {
@@ -98,12 +184,17 @@ const updateUser = async (req, res) => {
     const { id } = req.params;
     const { body } = req;
 
+<<<<<<< HEAD
     userSchema.validate(body)
+=======
+    updatedUserSchema.validate(body)
+>>>>>>> post
       .then(async (valid) => {
         const {
           fullName, email, newPassword, status, avatar, role,
         } = valid;
 
+<<<<<<< HEAD
         const saltRound = 10;
         const hashPassword = bcrypt.hashSync(newPassword, saltRound);
 
@@ -117,6 +208,31 @@ const updateUser = async (req, res) => {
 
         const buildResponse = BuildResponse.update({ data });
 
+=======
+        if (newPassword === '' || newPassword === undefined) {
+          await User.update({
+            fullName, email, status, avatar, role,
+          }, { where: { id } });
+        } else {
+          const saltRound = 10;
+          const hashPassword = bcrypt.hashSync(newPassword, saltRound);
+
+          await User.update({
+            fullName, email, password: hashPassword, status, avatar, role,
+          }, { where: { id } });
+        }
+
+        const getData = await User.findByPk(id);
+        const hidePassword = JSON.stringify(getData, (key, value) => {
+          if (key === 'password') {
+            return undefined;
+          }
+          return value;
+        });
+
+        const data = JSON.parse(hidePassword);
+        const buildResponse = BuildResponse.updated({ data });
+>>>>>>> post
         return res.status(201).json(buildResponse);
       })
       .catch((error) => {
@@ -146,6 +262,7 @@ module.exports = {
   updateUser,
   deleteUser,
 };
+<<<<<<< HEAD
 
 /*
 userSchema.validate(body)
@@ -168,3 +285,5 @@ userSchema.validate(body)
       .catch((error) => {
         res.status(400).json({ message: error.message });
       }); */
+=======
+>>>>>>> post
