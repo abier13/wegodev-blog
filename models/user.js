@@ -1,14 +1,7 @@
-<<<<<<< HEAD
 'use strict';
 const {
   Model, Sequelize,
 } = require('sequelize');
-=======
-const {
-  Model, Sequelize,
-} = require('sequelize');
-
->>>>>>> post
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -17,14 +10,10 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-<<<<<<< HEAD
-      // define association here
-=======
       User.belongsTo(models.File, {
         foreignKey: 'avatar',
         as:'Avatar',
       });
->>>>>>> post
     }
   }
   User.init({
@@ -42,7 +31,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
-<<<<<<< HEAD
     password: {
       type: Sequelize.STRING,
       allowNull: false,
@@ -50,16 +38,6 @@ module.exports = (sequelize, DataTypes) => {
     role: {
       type: Sequelize.ENUM('Super Admin', 'Creator'),
       allowNull: false,
-=======
-    role: {
-      type: Sequelize.ENUM('Super Admin', 'Creator'),
-      allowNull: false,
-      defaultValue: 'Creator',
-    },
-    password: {
-      type: Sequelize.STRING,
-      allowNull: false,
->>>>>>> post
     },
     status: {
       type: Sequelize.ENUM('Active', 'Suspend'),

@@ -22,20 +22,9 @@ const options = {
   apis: ['./src/routes/*.js'],
 };
 
-const swaggerSpec = swaggerJSDoc(options);
-
 // Import Router
 const uploadRouter = require('./src/routes/upload.routes');
 const userRouter = require('./src/routes/user.routes');
-<<<<<<< HEAD
-
-// Routes Import
-app.use(express.static(path.join(__dirname)));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-app.use('/v1', uploadRouter);
-app.use('/v1', userRouter);
-=======
 const authRouter = require('./src/routes/auth.routes');
 const categoryhRouter = require('./src/routes/category.routes');
 const postsRouter = require('./src/routes/posts.routes');
@@ -47,7 +36,6 @@ app.use('/v1', userRouter);
 app.use('/v1', authRouter);
 app.use('/v1', categoryhRouter);
 app.use('/v1', postsRouter);
->>>>>>> post
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
