@@ -5,11 +5,11 @@ const router = express.Router();
 
 const PostsController = require('../controllers/posts.controller');
 
-router.get('/posts', PostsController.getAllPosts);
-router.get('/posts/:id', PostsController.getPostById);
-router.get('/posts/get-by-slug/:slug', PostsController.getPostBySlug);
-router.post('/posts', Authentication.Authorization, PostsController.createPost);
-router.put('/posts/:id', Authentication.Authorization, PostsController.updatePost);
-router.post('/posts/:id', Authentication.Authorization, PostsController.deletePost);
+router.get('/post', PostsController.getAllPosts);
+router.get('/post/:id', PostsController.getPostById);
+router.get('/post/get-by-slug/:slug', PostsController.getPostBySlug);
+router.post('/post', Authentication.Authorization, PostsController.createPost);
+router.put('/post/:id', Authentication.Authorization, PostsController.updatePost);
+router.delete('/post/:id', Authentication.Authorization, PostsController.deletePost);
 
 module.exports = router;

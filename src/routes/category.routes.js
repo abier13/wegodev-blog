@@ -5,10 +5,10 @@ const router = express.Router();
 
 const CategoryController = require('../controllers/category.controller');
 
-router.get('/categories', CategoryController.getAllCategory);
-router.get('/categories/:id', CategoryController.getCategoryById);
-router.post('/categories', Authentication.Authorization, CategoryController.createCategory);
-router.put('/categories/:id', Authentication.Authorization, CategoryController.updateCategory);
-router.post('/categories/:id', Authentication.Authorization, CategoryController.deleteCategory);
+router.get('/category', CategoryController.getAllCategory);
+router.get('/category/:id', CategoryController.getCategoryById);
+router.post('/category', Authentication.Authorization, CategoryController.createCategory);
+router.put('/category/:id', Authentication.Authorization, CategoryController.updateCategory);
+router.delete('/category/:id', Authentication.Authorization, CategoryController.deleteCategory);
 
 module.exports = router;

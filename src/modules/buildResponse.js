@@ -11,13 +11,13 @@ const created = (dataResponse) => ({
 });
 
 const get = (dataResponse) => ({
-  code: 201,
+  code: 200,
   message: 'Data sudah diterima',
   ...dataResponse,
 });
 
 const updated = (dataResponse) => ({
-  code: 201,
+  code: 200,
   message: 'Data berhasil diperbarui',
   ...dataResponse,
 });

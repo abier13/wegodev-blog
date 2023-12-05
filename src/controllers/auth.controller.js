@@ -57,25 +57,31 @@ const login = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const { id } = req.params;
+    const token = req.headers.authorization;
 
-    const getData = await User.findByPk(id);
-
-    if (!getData) {
-      res.status(404).json({ message: 'User tidak ditemukan' });
-    }
-
-    const hidePassword = JSON.stringify(getData, (key, value) => {
-      if (key === 'password') {
-        return undefined;
+    jwt.verify(token.split(' ')[1], env.SECRET_KEY, async (err, decoded) => {
+      if (err) {
+        throw new Error(err.message);
       }
-      return value;
+
+      const getData = await User.findByPk(decoded.id);
+
+      if (!getData) {
+        res.status(404).json({ message: 'User tidak ditemukan' });
+      }
+
+      const hidePassword = JSON.stringify(getData, (key, value) => {
+        if (key === 'password') {
+          return undefined;
+        }
+        return value;
+      });
+
+      const data = JSON.parse(hidePassword);
+      const buildResponse = BuildResponse.get({ data });
+
+      res.status(200).json(buildResponse);
     });
-
-    const data = JSON.parse(hidePassword);
-    const buildResponse = BuildResponse.get({ data });
-
-    res.status(200).json(buildResponse);
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: 'Internal server error' });

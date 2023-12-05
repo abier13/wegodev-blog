@@ -35,7 +35,7 @@ const AuthorizationCreator = (req, res, next) => {
       throw new Error(err.message);
     }
 
-    if ((decoded.role === 'Creator' || decoded.role === 'Super Admin') && decoded.id === id) {
+    if ((decoded.role === 'Creator' && decoded.id === id) || decoded.role === 'Super Admin') {
       next();
     } else {
       res.status(401).json({ message: 'Id tidak sama dengan Akun Anda' });

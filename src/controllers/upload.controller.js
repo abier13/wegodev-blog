@@ -2,7 +2,7 @@
 const BuildResponse = require('../modules/buildResponse');
 const { File } = require('../../models');
 
-const upload = async (req, res) => {
+const uploadFile = async (req, res) => {
   try {
     const { file } = req;
     const { filename, mimetype, path } = file;
@@ -27,4 +27,4 @@ const upload = async (req, res) => {
   }
 };
 
-module.exports = { upload };
+module.exports = { uploadFile };

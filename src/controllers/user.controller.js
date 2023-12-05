@@ -43,6 +43,8 @@ const getAllUsers = async (req, res) => {
       ],
     });
 
+    const totalData = await User.count();
+
     const hidePassword = JSON.stringify(getAllData, (key, value) => {
       if (key === 'password') {
         return undefined;
@@ -54,7 +56,7 @@ const getAllUsers = async (req, res) => {
     const resp = {
       code: res.statusCode,
       message: `${data.length} data sudah diterima`,
-      count: data.length,
+      count: totalData,
       data,
     };
 

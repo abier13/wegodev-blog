@@ -9,6 +9,7 @@ const categorySchema = yup.object().shape({
 const getAllCategory = async (req, res) => {
   try {
     let { page, pageSize, title } = req.query;
+
     page = parseInt(page) || 1;
     pageSize = parseInt(pageSize) || 10;
 
@@ -23,10 +24,12 @@ const getAllCategory = async (req, res) => {
       where,
     });
 
+    const totalData = await Categories.count();
+
     const resp = {
       code: res.statusCode,
       message: `${data.length} data sudah diterima`,
-      count: data.length,
+      count: totalData,
       data,
     };
 
@@ -88,7 +91,7 @@ const updateCategory = async (req, res) => {
         const { title } = valid;
         const data = { title };
 
-        await Categories.update({ data }, { where: { id } });
+        await Categories.update({ title }, { where: { id } });
 
         const buildResponse = BuildResponse.updated({ data });
         return res.status(201).json(buildResponse);
